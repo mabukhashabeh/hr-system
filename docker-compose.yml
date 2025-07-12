@@ -1,0 +1,43 @@
+services:
+  api:
+    build: ./backend
+    container_name: hr_system_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - media_volume:/app/media
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - frontend
+    command: []
+
+  frontend:
+    container_name: hr_system_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - default
+
+  db:
+    image: postgres:15
+    container_name: hr_system_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-hr_system}
+      - POSTGRES_USER=${POSTGRES_USER:-hr_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-hr_password}
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+  media_volume: 
