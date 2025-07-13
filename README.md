@@ -8,7 +8,7 @@ A micro HR management system with candidate registration, status tracking, and r
 
 - **Backend:** Django REST API with PostgreSQL, Celery, RabbitMQ
 - **Frontend:** Vue.js with modern UI components
-- **Testing:** Detailed test suite with over 90% coverage
+- **Testing:** Detailed test suite with 99% coverage (199 tests)
 - **Code Quality:** Automated pre-commit hooks for consistent code standards
 
 ## What This System Does
@@ -124,33 +124,27 @@ A micro HR management system with candidate registration, status tracking, and r
    TEST_DJANGO_SETTINGS_MODULE=config.test_settings
    ```
 
-5. **Start the entire system**
+5. **Install dependencies and start the system**
    ```bash
    cd backend
+   make install
    make up
    ```
 
 6. **Wait for services to start** (first time takes 2-3 minutes)
    - API container building
-   - Database initialization
+   - Database initialization and automatic migrations
    - Frontend container building
 
-7. **Run database migrations** (first time only)
-   ```bash
-   cd backend
-   make makemigrations
-   make migrate
-   ```
-
-8. **Access the application**
+7. **Access the application**
    - Frontend: http://localhost:8080
    - API: http://localhost:8000/api/
 
 ### First Time Setup Notes
 
 - **First run**: Docker will download images and build containers
-- **Database**: PostgreSQL will initialize automatically
-- **Migrations**: Run `make makemigrations` and `make migrate` manually
+- **Database**: PostgreSQL will initialize automatically with migrations
+- **Migrations**: Applied automatically during container startup
 - **Media files**: Resume uploads stored in `backend/media/`
 
 ## Code Quality & Pre-commit Hooks
@@ -297,8 +291,8 @@ make help
 
 ### Test Performance
 
-- **Execution time**: ~2.4 seconds for all 50 tests
-- **Coverage**: 90% with comprehensive test suite
+- **Execution time**: ~2.4 seconds for all 199 tests
+- **Coverage**: 99% with comprehensive test suite
 - **Test isolation**: Each test runs in clean environment
 - **Parallel execution**: Support for parallel test running
 
@@ -460,7 +454,7 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 
 ### Maintainability
 - **Comprehensive documentation** with clear examples
-- **Automated testing** with 50 test cases
+- **Automated testing** with 199 test cases
 - **Development tools** for code quality
 - **Clear project structure** following conventions
 - **Environment configuration** management
@@ -471,18 +465,264 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 - **Responsive frontend** with modern UI
 - **Real-time status updates** with history tracking
 
-## API Endpoints
+## API Documentation
+
+### Base URL
+```
+http://localhost:8000/api/v1
+```
+
+### Authentication
+Admin endpoints require the `X-ADMIN: 1` header for authentication.
 
 ### Public Endpoints
-- `POST /api/v1/candidates/` - Candidate registration
-- `GET /api/v1/candidates/status/` - Status check by email
+
+#### 1. Candidate Registration
+```bash
+curl -X POST http://localhost:8000/api/v1/candidates/ \
+  -H "Content-Type: multipart/form-data" \
+  -F "full_name=John Doe" \
+  -F "email=john.doe@example.com" \
+  -F "phone=+1234567890" \
+  -F "department=it" \
+  -F "years_of_experience=5" \
+  -F "date_of_birth=1990-01-01" \
+  -F "resume=@/path/to/resume.pdf"
+```
+
+**Response:**
+```json
+{
+  "id": "uuid-here",
+  "full_name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "+1234567890",
+  "department": "Information Technology",
+  "years_of_experience": 5,
+  "current_status": "Submitted",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+#### 2. Status Check (Public)
+```bash
+curl -X GET "http://localhost:8000/api/v1/candidates/status/?email=john.doe@example.com"
+```
+
+**Response:**
+```json
+{
+  "full_name": "John Doe",
+  "email": "john.doe@example.com",
+  "current_status": "Under Review",
+  "department": "Information Technology",
+  "last_updated": "2024-01-15T14:30:00Z"
+}
+```
 
 ### Admin Endpoints
-- `GET /api/v1/candidates/` - List all candidates
-- `GET /api/v1/candidates/{id}/` - Get candidate details
-- `PATCH /api/v1/candidates/{id}/` - Update candidate status
-- `GET /api/v1/candidates/{id}/status-history/` - Get status history
-- `GET /api/v1/candidates/{id}/download-resume/` - Download resume
+
+#### 1. List All Candidates
+```bash
+curl -X GET http://localhost:8000/api/v1/candidates/ \
+  -H "X-ADMIN: 1"
+```
+
+**With Pagination:**
+```bash
+curl -X GET "http://localhost:8000/api/v1/candidates/?page=1&page_size=10" \
+  -H "X-ADMIN: 1"
+```
+
+**With Filtering:**
+```bash
+curl -X GET "http://localhost:8000/api/v1/candidates/?department=Information%20Technology&current_status=Under%20Review" \
+  -H "X-ADMIN: 1"
+```
+
+**With Search:**
+```bash
+curl -X GET "http://localhost:8000/api/v1/candidates/?search=john" \
+  -H "X-ADMIN: 1"
+```
+
+**Response:**
+```json
+{
+  "count": 25,
+  "next": "http://localhost:8000/api/v1/candidates/?page=2",
+  "previous": null,
+  "results": [
+    {
+      "id": "uuid-here",
+      "full_name": "John Doe",
+      "email": "john.doe@example.com",
+      "department": "Information Technology",
+      "current_status": "Under Review",
+      "years_of_experience": 5,
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+#### 2. Get Candidate Details
+```bash
+curl -X GET http://localhost:8000/api/v1/candidates/{candidate-id}/ \
+  -H "X-ADMIN: 1"
+```
+
+**Response:**
+```json
+{
+  "id": "uuid-here",
+  "full_name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "+1234567890",
+  "department": "Information Technology",
+  "years_of_experience": 5,
+  "date_of_birth": "1990-01-01",
+  "age": 34,
+  "current_status": "Under Review",
+  "resume_url": "http://localhost:8000/media/resumes/resume.pdf",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T14:30:00Z"
+}
+```
+
+#### 3. Update Candidate Status
+```bash
+curl -X PATCH http://localhost:8000/api/v1/candidates/{candidate-id}/ \
+  -H "X-ADMIN: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "new_status": "Interview Scheduled",
+    "admin_feedback": "Strong candidate, scheduling interview for next week",
+    "admin_email": "hr@company.com"
+  }'
+```
+
+**Response:**
+```json
+{
+  "id": "uuid-here",
+  "full_name": "John Doe",
+  "email": "john.doe@example.com",
+  "current_status": "Interview Scheduled",
+  "department": "Information Technology",
+  "years_of_experience": 5,
+  "resume_url": "http://localhost:8000/media/resumes/resume.pdf",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T15:30:00Z"
+}
+```
+
+#### 4. Get Status History
+```bash
+curl -X GET http://localhost:8000/api/v1/candidates/{candidate-id}/status-history/ \
+  -H "X-ADMIN: 1"
+```
+
+**Response:**
+```json
+{
+  "count": 3,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "uuid-here",
+      "candidate": "candidate-uuid",
+      "previous_status": "Submitted",
+      "new_status": "Under Review",
+      "admin_feedback": "Application received and under review",
+      "admin_email": "hr@company.com",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "uuid-here",
+      "candidate": "candidate-uuid",
+      "previous_status": "Under Review",
+      "new_status": "Interview Scheduled",
+      "admin_feedback": "Strong candidate, scheduling interview",
+      "admin_email": "hr@company.com",
+      "created_at": "2024-01-15T14:30:00Z"
+    }
+  ]
+}
+```
+
+#### 5. Download Resume
+```bash
+curl -X GET http://localhost:8000/api/v1/candidates/{candidate-id}/resume/ \
+  -H "X-ADMIN: 1"
+```
+
+**Response:**
+```json
+{
+  "id": "uuid-here",
+  "download_url": "http://localhost:8000/media/resumes/it/uuid-here/resume.pdf"
+}
+```
+
+**If resume is missing:**
+```json
+{
+  "error": "Resume not found for this candidate"
+}
+```
+
+### Error Responses
+
+#### 400 Bad Request
+```json
+{
+  "email": ["Enter a valid email address."],
+  "phone": ["Invalid phone number format. Use E.164 format."],
+  "years_of_experience": ["Years of experience cannot exceed 50."]
+}
+```
+
+#### 401 Unauthorized
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+#### 403 Forbidden
+```json
+{
+  "detail": "You do not have permission to perform this action."
+}
+```
+
+#### 404 Not Found
+```json
+{
+  "detail": "Not found."
+}
+```
+
+#### 429 Too Many Requests
+```json
+{
+  "detail": "Request was throttled. Expected available in 60 seconds."
+}
+```
+
+### Status Values
+- `Submitted` - Initial application status
+- `Under Review` - Application being reviewed
+- `Interview Scheduled` - Interview arranged
+- `Accepted` - Application accepted
+- `Rejected` - Application rejected
+
+### Department Values
+- `it` - Information Technology
+- `hr` - Human Resources
+- `finance` - Finance
 
 ## Status Flow
 
