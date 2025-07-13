@@ -1,0 +1,25 @@
+services:
+  test:
+    build: ../backend
+    container_name: hr_system_test
+    volumes:
+      - ../backend:/app
+      - test_media:/app/media
+    env_file:
+      - .env
+    environment:
+      - DEBUG=${TEST_DEBUG}
+      - ALLOWED_HOSTS=${TEST_ALLOWED_HOSTS}
+      - DJANGO_SETTINGS_MODULE=${TEST_DJANGO_SETTINGS_MODULE}
+      - DJANGO_DISABLE_MIGRATIONS=${TEST_DJANGO_DISABLE_MIGRATIONS}
+    entrypoint: []
+    command: python3 -m pytest --cov=candidate --cov=core --cov-report=html --cov-report=term-missing -v
+    networks:
+      - test_network
+
+volumes:
+  test_media:
+
+networks:
+  test_network:
+    driver: bridge 

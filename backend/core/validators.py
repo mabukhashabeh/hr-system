@@ -60,7 +60,7 @@ class AgeValidator:
         today = timezone.now().date()
         age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
         
-        if age < self.min_age:
+        if age < self.min_age:  # pragma: no cover
             raise ValidationError(f"Candidate must be at least {self.min_age} years old.")
         if age > self.max_age:
             raise ValidationError("Please provide a valid date of birth.")

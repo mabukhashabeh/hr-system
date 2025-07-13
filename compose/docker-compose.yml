@@ -1,11 +1,11 @@
 services:
   api:
-    build: ./backend
+    build: ../backend
     container_name: hr_system_api
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ../backend:/app
       - media_volume:/app/media
     env_file:
       - .env
@@ -17,7 +17,7 @@ services:
   frontend:
     container_name: hr_system_frontend
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     ports:
       - "8080:80"

@@ -22,7 +22,7 @@ wheels/
 MANIFEST
 
 # Virtual environments
-.env
+compose/.env
 .venv
 env/
 venv/
@@ -158,7 +158,7 @@ pids/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+compose/.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

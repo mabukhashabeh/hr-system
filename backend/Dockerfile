@@ -19,7 +19,7 @@ RUN apt-get update \
 COPY pyproject.toml README.md ./
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir uv \
-    && uv pip install --system .
+    && uv pip install --system .[dev]
 
 # Copy project
 COPY . .

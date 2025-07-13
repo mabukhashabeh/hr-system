@@ -63,8 +63,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# Use in-memory SQLite for faster tests
+# Database - Use in-memory SQLite for tests
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -125,6 +124,9 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
         'rest_framework.parsers.FormParser',
     ],
+    # Disable throttling for tests
+    'DEFAULT_THROTTLE_CLASSES': [],
+    'DEFAULT_THROTTLE_RATES': {},
 }
 
 # CORS settings
@@ -160,16 +162,6 @@ LOGGING = {
 # Test-specific settings
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# Disable migrations during tests for speed
-class DisableMigrations:
-    def __contains__(self, item):
-        return True
-    
-    def __getitem__(self, item):
-        return None
-
-MIGRATION_MODULES = DisableMigrations()
-
 # Cache settings for tests
 CACHES = {
     'default': {
@@ -178,14 +170,4 @@ CACHES = {
 }
 
 # Email backend for tests
-EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
-
-# Security settings for tests
-SECURE_BROWSER_XSS_FILTER = False
-SECURE_CONTENT_TYPE_NOSNIFF = False
-SECURE_HSTS_SECONDS = 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False 
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend' 
