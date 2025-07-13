@@ -18,6 +18,10 @@ dependencies = [
     "drf-yasg>=1.21.0",
     "python-decouple>=3.8",
     "Pillow>=10.0.0",
+    "celery>=5.3.0",
+    "kombu>=5.3.0",
+    "amqp>=5.1.0",
+    "django-ses>=4.4.0",
 ]
 
 [project.optional-dependencies]

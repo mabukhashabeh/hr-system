@@ -28,7 +28,6 @@ install:
 	@echo "Installing dependencies..."
 	docker-compose -f ../compose/docker-compose.yml run --rm api pip install -e .
 
-# Install development dependencies
 dev:
 	@echo "Installing development dependencies..."
 	docker-compose -f ../compose/docker-compose.yml run --rm api pip install -e ".[dev]"
@@ -42,10 +41,7 @@ test-build:
 test:
 	@echo "Running all tests with coverage..."
 	docker-compose  -f ../compose/docker-compose.test.yml run --rm test
-	@echo "Cleaning up test containers..."
-	docker-compose  -f ../compose/docker-compose.test.yml down --remove-orphans -v
 
-# Run tests with coverage report
 coverage:
 	@echo "Running tests with coverage report..."
 	docker-compose  -f ../compose/docker-compose.test.yml run --rm test
@@ -78,6 +74,11 @@ up:
 	@echo "Starting all services..."
 	docker-compose -f ../compose/docker-compose.yml up
 
+# Start all services in background
+up-d:
+	@echo "Starting all services in background..."
+	docker-compose -f ../compose/docker-compose.yml up -d
+
 # Stop all services
 down:
 	@echo "Stopping all services..."
@@ -88,10 +89,24 @@ logs:
 	@echo "Showing logs..."
 	docker-compose -f ../compose/docker-compose.yml logs -f
 
+# Show logs for specific service
+logs-api:
+	@echo "Showing API logs..."
+	docker-compose -f ../compose/docker-compose.yml logs -f api
+
+logs-celery:
+	@echo "Showing Celery logs..."
+	docker-compose -f ../compose/docker-compose.yml logs -f celery
+
 # Open shell in API container
 shell:
 	@echo "Opening shell in API container..."
 	docker-compose -f ../compose/docker-compose.yml run --rm api bash
+
+# Open shell in Celery container
+shell-celery:
+	@echo "Opening shell in Celery container..."
+	docker-compose -f ../compose/docker-compose.yml run --rm celery bash
 
 # Build Docker images
 build:

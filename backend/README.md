@@ -10,6 +10,8 @@ A Django REST API for managing job candidates. This handles all the data, busine
 - Provide search and filtering
 - Manage user permissions
 - Generate status history
+- Send email notifications asynchronously
+- Process background tasks with Celery
 
 ## User Roles
 
@@ -23,6 +25,7 @@ A Django REST API for managing job candidates. This handles all the data, busine
 ### Candidates
 - **Public registration**: Submit applications with personal information
 - **Status checking**: Check application status via public endpoint
+- **Email notifications**: Receive confirmation and status update emails
 - **No direct system access**: Cannot view other candidates or admin features
 
 ## Features
@@ -38,6 +41,19 @@ A Django REST API for managing job candidates. This handles all the data, busine
 - Automatic status history logging
 - Status validation (can't skip steps)
 - Timestamps for all changes
+
+### Email Notifications
+- **Registration confirmation**: Welcome email when candidate registers
+- **Status updates**: Notify candidates when their status changes
+- **Asynchronous processing**: Emails sent in background using Celery
+- **Template-based**: HTML and plain text email templates
+- **Configurable**: Support for multiple email providers (SMTP, AWS SES, etc.)
+
+### Background Tasks
+- **Celery integration**: Process tasks asynchronously
+- **RabbitMQ message queue**: Reliable task processing
+- **Email queuing**: Non-blocking email sending
+- **Task monitoring**: Track task status and failures
 
 ### Search and Filter
 - Search by name or email
@@ -102,6 +118,17 @@ A Django REST API for managing job candidates. This handles all the data, busine
    DB_HOST=localhost
    DB_PORT=5432
 
+   # Email settings (for notifications)
+   EMAIL_BACKEND=django.core.mail.backends.dummy.EmailBackend
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USE_TLS=True
+   EMAIL_HOST_USER=your-email@gmail.com
+   EMAIL_HOST_PASSWORD=your-app-password
+
+   # Celery settings
+   CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+
    # Test settings
    TEST_DB_HOST=test_db
    TEST_DB_NAME=hr_system_test
@@ -121,6 +148,8 @@ A Django REST API for managing job candidates. This handles all the data, busine
    - API container building
    - Database initialization
    - Frontend container building
+   - RabbitMQ message queue starting
+   - Celery worker starting
 
 7. **Access the application**
    - Frontend: http://localhost:8080
@@ -134,6 +163,8 @@ A Django REST API for managing job candidates. This handles all the data, busine
 - **Database**: PostgreSQL will initialize automatically
 - **Migrations**: Django migrations run automatically
 - **Media files**: Resume uploads stored in `backend/media/`
+- **Message queue**: RabbitMQ starts automatically
+- **Background workers**: Celery workers start automatically
 
 ## How to run
 
@@ -162,7 +193,7 @@ A Django REST API for managing job candidates. This handles all the data, busine
 
 ### Start and stop
 ```bash
-# Start everything (API, database, frontend)
+# Start everything (API, database, frontend, RabbitMQ, Celery)
 make up
 
 # Start only the API
@@ -173,6 +204,9 @@ make down
 
 # See logs
 make logs
+
+# See Celery logs
+make celery-logs
 ```
 
 ### Testing
@@ -198,8 +232,26 @@ make install
 # Install dev dependencies
 make dev
 
-# Build Docker images
-make build
+# Start Celery worker
+make celery
+
+# Monitor Celery tasks
+make celery-monitor
+```
+
+### Background tasks
+```bash
+# Start Celery worker
+make celery
+
+# Monitor Celery tasks
+make celery-monitor
+
+# Check Celery status
+make celery-status
+
+# Restart Celery worker
+make celery-restart
 ```
 
 ### Cleanup
@@ -225,6 +277,7 @@ make help
 | GET | `/api/v1/candidates/{id}/` | Get one candidate |
 | PATCH | `/api/v1/candidates/{id}/` | Update candidate status |
 | GET | `/api/v1/candidates/{id}/status-history/` | Get status history |
+| GET | `/api/v1/candidates/{id}/resume/` | Download resume |
 
 ### Status Check (Public)
 | Method | Endpoint | What it does |
@@ -247,6 +300,7 @@ make help
 - Search and filter candidates
 - Download resumes for review
 - Update candidate status
+- Send status update emails automatically
 
 ### Recruiter
 - View all candidates in the system
@@ -254,9 +308,12 @@ make help
 - Search for specific candidates
 - Check application progress
 - Generate reports
+- Receive email notifications for new applications
 
 ### Candidate
 - Check application status (public endpoint)
+- Receive confirmation email upon registration
+- Get status update notifications
 - No direct access to system
 
 ## Data Models
@@ -291,6 +348,44 @@ make help
 4. **Accepted** - Candidate is accepted
 5. **Rejected** - Application is rejected
 
+## Email Notifications
+
+### Registration Confirmation
+- **Trigger**: When candidate registers
+- **Content**: Welcome message with application details
+- **Template**: `templates/emails/registration_confirmation.html`
+- **Async**: Sent in background using Celery
+
+### Status Updates
+- **Trigger**: When admin updates candidate status
+- **Content**: Status change notification with feedback
+- **Template**: `templates/emails/status_update.html`
+- **Async**: Sent in background using Celery
+
+### Email Configuration
+- **SMTP**: Default for development
+- **AWS SES**: For production
+- **Dummy backend**: For testing (no actual emails sent)
+- **Templates**: HTML and plain text versions
+
+## Background Tasks
+
+### Celery Integration
+- **Task queue**: RabbitMQ for reliable message processing
+- **Worker processes**: Handle email sending and other tasks
+- **Task monitoring**: Track success/failure of background jobs
+- **Scalable**: Multiple workers can be added for high load
+
+### Available Tasks
+- **send_email_task**: Send email notifications asynchronously
+- **debug_task**: Test task for monitoring
+
+### Task Configuration
+- **Broker**: RabbitMQ (amqp://guest:guest@rabbitmq:5672//)
+- **Result backend**: Disabled (not needed for email tasks)
+- **Concurrency**: 12 workers per container
+- **Task routing**: Automatic routing to appropriate queues
+
 ## File Upload
 
 ### Supported formats
@@ -306,9 +401,9 @@ make help
 
 The backend has comprehensive tests:
 
-- **63 tests** covering all features
-- **99.7% code coverage**
-- **Fast execution** (1.15 seconds for all tests)
+- **50 tests** covering all features
+- **89% code coverage**
+- **Fast execution** (2.4 seconds for all tests)
 - **Isolated environment** (SQLite in-memory)
 
 ### Test categories
@@ -317,6 +412,8 @@ The backend has comprehensive tests:
 - Serializer tests (data validation)
 - Permission tests (access control)
 - Validator tests (custom validation)
+- Email notification tests
+- Background task tests
 
 ## Database Optimizations
 
@@ -453,6 +550,17 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 - **Psycopg2 Binary 2.9+** - PostgreSQL adapter
 - **Python Decouple 3.8+** - Environment config
 
+### Background Tasks & Messaging
+- **Celery 5.3+** - Task queue and background processing
+- **Kombu 5.3+** - Message transport
+- **AMQP 5.1+** - Message protocol
+- **RabbitMQ** - Message broker
+
+### Email & Notifications
+- **Django SES 4.4+** - AWS SES integration
+- **Email templates** - HTML and plain text
+- **Async processing** - Non-blocking email sending
+
 ### Testing
 - **Pytest 8.4+** - Testing framework
 - **Pytest Django 4.11+** - Django integration
@@ -484,6 +592,17 @@ DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 
+# Email settings (for notifications)
+EMAIL_BACKEND=django.core.mail.backends.dummy.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+
+# Celery settings
+CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+
 # Test settings
 TEST_DB_HOST=test_db
 TEST_DB_NAME=hr_system_test
@@ -506,11 +625,16 @@ backend/
 │   └── tests/             # Tests
 ├── core/                  # Shared utilities
 │   ├── validators.py      # Custom validators
+│   ├── notification_service.py  # Email notification service
+│   ├── tasks.py           # Celery background tasks
 │   └── tests/             # Tests
 ├── config/                # Django settings
 │   ├── settings.py        # Main settings
 │   ├── test_settings.py   # Test settings
+│   ├── celery.py          # Celery configuration
 │   └── urls.py           # URL routing
+├── templates/             # Email templates
+│   └── emails/           # Email HTML templates
 ├── manage.py             # Django management
 ├── Dockerfile            # Container setup
 ├── entry.sh              # Startup script
@@ -521,7 +645,7 @@ backend/
 ## Technical Assessment Strengths
 
 ### Code Quality
-- **99.7% test coverage** with detailed test suite
+- **89% test coverage** with detailed test suite
 - **Clean architecture** following Django best practices
 - **Type hints** and comprehensive documentation
 - **Code formatting** with Black and isort
@@ -530,9 +654,10 @@ backend/
 ### Performance
 - **Database optimization** with strategic indexing
 - **Efficient queries** with proper ORM usage
-- **Fast test execution** (1.15 seconds for 63 tests)
+- **Fast test execution** (2.4 seconds for 50 tests)
 - **Containerized deployment** for consistency
 - **Rate limiting** to prevent abuse
+- **Asynchronous processing** for non-blocking operations
 
 ### Scalability
 - **Microservices architecture** with Docker Compose
@@ -540,10 +665,11 @@ backend/
 - **Database indexing** for large datasets
 - **Pagination** for handling large result sets
 - **Modular design** for easy extension
+- **Background task processing** with Celery and RabbitMQ
 
 ### Maintainability
 - **Comprehensive documentation** with clear examples
-- **Automated testing** with 63 test cases
+- **Automated testing** with 50 test cases
 - **Development tools** for code quality
 - **Clear project structure** following conventions
 - **Environment configuration** management
@@ -554,6 +680,7 @@ backend/
 - **Swagger documentation** for API exploration
 - **Responsive frontend** with modern UI
 - **Real-time status updates** with history tracking
+- **Email notifications** for better user engagement
 
 ## Troubleshooting
 
@@ -605,6 +732,34 @@ make up
 lsof -i :8000
 lsof -i :8080
 lsof -i :5432
+lsof -i :5672
 
 # Stop conflicting services or change ports in compose/.env
+```
+
+### Celery/RabbitMQ issues
+```bash
+# Check Celery worker status
+make celery-status
+
+# Restart Celery worker
+make celery-restart
+
+# Check RabbitMQ logs
+docker logs hr_system_rabbitmq
+
+# Restart message queue
+make down
+make up
+```
+
+### Email issues
+```bash
+# Check email configuration
+grep EMAIL compose/.env
+
+# Test email sending
+make shell
+python manage.py shell
+# Test email sending in shell
 ``` 

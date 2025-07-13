@@ -1,0 +1,37 @@
+Application Status Update - HR System
+
+Dear {{ recipient_name }},
+
+Your application status has been updated.
+
+STATUS UPDATE:
+• Previous Status: {{ previous_status }}
+• New Status: {{ new_status }}
+• Updated: {{ update_date }}
+
+{% if feedback %}
+FEEDBACK FROM HR TEAM:
+{{ feedback }}
+{% endif %}
+
+WHAT THIS MEANS:
+{% if new_status == "Under Review" %}
+Your application is currently being reviewed by our HR team. We will contact you soon with next steps.
+{% elif new_status == "Interview Scheduled" %}
+Congratulations! Your application has progressed to the interview stage. We will contact you with interview details.
+{% elif new_status == "Accepted" %}
+Excellent news! Your application has been accepted. We will contact you with next steps and onboarding information.
+{% elif new_status == "Rejected" %}
+Thank you for your interest in our company. We appreciate the time you took to apply and will keep your resume on file for future opportunities.
+{% else %}
+Your application status has been updated. Please check our portal for more details.
+{% endif %}
+
+UPDATED BY: {{ admin_name }}
+APPLICATION ID: {{ application_id }}
+
+You will receive further communications based on your new status. If you have any questions, please contact our HR team.
+
+---
+HR System
+This is an automated message. Please do not reply to this email. 

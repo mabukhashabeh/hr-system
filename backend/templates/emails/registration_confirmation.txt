@@ -1,0 +1,23 @@
+Application Received - HR System
+
+Dear {{ recipient_name }},
+
+We have successfully received your application for the {{ department }} position. Your application has been registered in our system and is currently under review.
+
+APPLICATION DETAILS:
+• Application ID: {{ application_id }}
+• Position: {{ department }}
+• Registration Date: {{ registration_date }}
+• Email: {{ recipient_email }}
+
+WHAT HAPPENS NEXT:
+1. Initial Review: Our HR team will review your application
+2. Status Updates: You will receive email notifications about your application status
+3. Interview Process: If selected, you will be contacted for an interview
+4. Final Decision: You will be notified of the final decision
+
+We will keep you updated throughout the process. You can expect to hear from us within 5-7 business days.
+
+---
+HR System
+This is an automated message. Please do not reply to this email. 

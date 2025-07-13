@@ -1,28 +1,30 @@
-from http.client import responses
-
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
-from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter, SearchFilter
 import logging
+from typing import Dict, Any
 
+from candidate.filters import CandidateFilter
 from candidate.models import Candidate, StatusHistory
+from candidate.permissions import CandidatePermission, AdminOnlyPermission
 from candidate.serializers import (
     CandidateRegistrationSerializer,
     CandidateListSerializer,
+    CandidateDetailSerializer,
     CandidateStatusSerializer,
     StatusUpdateSerializer,
-    CandidateDetailSerializer,
-    StatusHistorySerializer,
-    ResumeDownloadSerializer,  # <-- add import
+    ResumeDownloadSerializer,
 )
-from candidate.filters import CandidateFilter, StatusHistoryFilter
-from candidate.permissions import CandidatePermission, AdminOnlyPermission
+from core.tasks import send_email_task
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.response import Response
 
-# from candidate.utils import NotificationService
+from candidate.filters import StatusHistoryFilter
+from candidate.serializers import StatusHistorySerializer
+from candidate.utils import send_registration_email, send_status_update_email
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +38,9 @@ class CandidateViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = CandidateFilter
-    ordering_fields = ['created_at', 'full_name', 'years_of_experience']
-    ordering = ['-created_at']
-    http_method_names = ['get', 'post', 'patch', 'head', 'options']
+    ordering_fields = ["created_at", "full_name", "years_of_experience"]
+    ordering = ["-created_at"]
+    http_method_names = ["get", "post", "patch", "head", "options"]
 
     def get_serializer_class(self):
         """
@@ -64,6 +66,8 @@ class CandidateViewSet(viewsets.ModelViewSet):
         candidate = serializer.save()
 
         logger.info(f"New candidate registered: {candidate.full_name} ({candidate.email})")
+        # Trigger registration confirmation email
+        send_registration_email(candidate)
 
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
@@ -98,12 +102,12 @@ class CandidateViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(
             instance=candidate,
             data=request.data,
-            context={'request': request, 'candidate': candidate}
+            context={"request": request, "candidate": candidate}
         )
         serializer.is_valid(raise_exception=True)
 
         # Get the new status before updating for logging
-        new_status = serializer.validated_data['new_status']
+        new_status = serializer.validated_data["new_status"]
         previous_status = candidate.current_status
 
         updated_candidate = serializer.update(candidate, serializer.validated_data)
@@ -112,9 +116,17 @@ class CandidateViewSet(viewsets.ModelViewSet):
             f"Status updated for candidate {candidate.full_name}: {previous_status} -> {new_status}"
         )
 
+        # Trigger status update email
+        send_status_update_email(
+            candidate=updated_candidate,
+            new_status=new_status,
+            previous_status=previous_status,
+            update_data=serializer.validated_data
+        )
+
         response_serializer = CandidateDetailSerializer(
             updated_candidate,
-            context={'request': request}
+            context={"request": request}
         )
 
         return Response(
@@ -123,9 +135,9 @@ class CandidateViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.action in ['create', 'status']:
+        if self.action in ["create", "status"]:
             return [CandidatePermission()]
-        elif self.action in ['list', 'retrieve', 'partial_update', 'download_resume']:
+        elif self.action in ["list", "retrieve", "partial_update", "download_resume"]:
             return [AdminOnlyPermission()]
         else:
             raise PermissionDenied()
@@ -135,10 +147,10 @@ class StatusHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only ViewSet for status history (admin only, with filtering).
     """
-    queryset = StatusHistory.objects.select_related('candidate')
+    queryset = StatusHistory.objects.select_related("candidate")
     serializer_class = StatusHistorySerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = StatusHistoryFilter
-    ordering_fields = ['created_at', 'candidate__full_name', 'new_status']
-    ordering = ['-created_at']
+    ordering_fields = ["created_at", "candidate__full_name", "new_status"]
+    ordering = ["-created_at"]
     permission_classes = [AdminOnlyPermission]

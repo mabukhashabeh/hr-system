@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Application Status Update</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #007bff; margin: 0; }
+        .status-box { background-color: #e3f2fd; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #007bff; }
+        .feedback-box { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Application Status Update</h1>
+            <p>Your application status has been updated</p>
+        </div>
+        
+        <p>Dear {{ recipient_name }},</p>
+        
+        <div class="status-box">
+            <h3>Status Update</h3>
+            <p><strong>Previous Status:</strong> {{ previous_status }}</p>
+            <p><strong>New Status:</strong> <span style="color: #007bff; font-weight: bold;">{{ new_status }}</span></p>
+            <p><strong>Updated:</strong> {{ update_date }}</p>
+        </div>
+        
+        {% if feedback %}
+        <div class="feedback-box">
+            <h4>Feedback from HR Team:</h4>
+            <p>{{ feedback }}</p>
+        </div>
+        {% endif %}
+        
+        <h3>What this means:</h3>
+        {% if new_status == "Under Review" %}
+            <p>Your application is currently being reviewed by our HR team. We will contact you soon with next steps.</p>
+        {% elif new_status == "Interview Scheduled" %}
+            <p>Congratulations! Your application has progressed to the interview stage. We will contact you with interview details.</p>
+        {% elif new_status == "Accepted" %}
+            <p>Excellent news! Your application has been accepted. We will contact you with next steps and onboarding information.</p>
+        {% elif new_status == "Rejected" %}
+            <p>Thank you for your interest in our company. We appreciate the time you took to apply and will keep your resume on file for future opportunities.</p>
+        {% else %}
+            <p>Your application status has been updated. Please check our portal for more details.</p>
+        {% endif %}
+        
+        <p><strong>Updated by:</strong> {{ admin_name }}</p>
+        <p><strong>Application ID:</strong> {{ application_id }}</p>
+        
+        <p>You will receive further communications based on your new status. If you have any questions, please contact our HR team.</p>
+        
+        <div class="footer">
+            <p><strong>HR System</strong></p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html> 

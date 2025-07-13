@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Application Received</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #007bff; margin: 0; }
+        .highlight { background-color: #e3f2fd; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Application Received</h1>
+            <p>Thank you for your interest in joining our team!</p>
+        </div>
+        
+        <p>Dear {{ recipient_name }},</p>
+        
+        <p>We have successfully received your application for the <strong>{{ department }}</strong> position. Your application has been registered in our system and is currently under review.</p>
+        
+        <div class="highlight">
+            <strong>Application Details:</strong><br>
+            • Application ID: {{ application_id }}<br>
+            • Position: {{ department }}<br>
+            • Registration Date: {{ registration_date }}<br>
+            • Email: {{ recipient_email }}
+        </div>
+        
+        <h3>What happens next?</h3>
+        <ol>
+            <li><strong>Initial Review:</strong> Our HR team will review your application</li>
+            <li><strong>Status Updates:</strong> You will receive email notifications about your application status</li>
+            <li><strong>Interview Process:</strong> If selected, you will be contacted for an interview</li>
+            <li><strong>Final Decision:</strong> You will be notified of the final decision</li>
+        </ol>
+        
+        <p>We will keep you updated throughout the process. You can expect to hear from us within 5-7 business days.</p>
+        
+        <div class="footer">
+            <p><strong>HR System</strong></p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html> 
