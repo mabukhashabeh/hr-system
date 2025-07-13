@@ -94,8 +94,8 @@ class PhoneNumberValidator:
         if not value or not isinstance(value, str):
             raise ValidationError("Phone number must be a valid string.")
 
-        # Simple regex for phone number validation (can be extended)
-        if not re.match(r"^\+?[1-9]\d{1,14}$", value):
+        # Require 10-15 digits, first digit not zero
+        if not re.match(r"^\+?[1-9]\d{9,14}$", value):
             raise ValidationError("Invalid phone number format. Use E.164 format.")
 
     def __eq__(self, other):

@@ -116,6 +116,7 @@ class CandidateViewSet(viewsets.ModelViewSet):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
+        """Return appropriate permissions based on the action."""
         if self.action in ["create", "status"]:
             return [CandidatePermission()]
         elif self.action in ["list", "retrieve", "partial_update", "download_resume"]:

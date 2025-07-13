@@ -141,6 +141,23 @@ class TestCandidateModel(TestCase):
         with self.assertRaises(IntegrityError):
             CandidateFactory(phone=candidate1.phone)
 
+    def test_indexes_exist(self):
+        """Test that required indexes exist."""
+        indexes = [index.name for index in Candidate._meta.indexes]
+        # Check that indexes exist (actual names may vary)
+        self.assertGreater(len(indexes), 0)
+        # Check that we have the expected number of indexes
+        self.assertEqual(len(indexes), 2)
+
+    def test_verbose_names(self):
+        """Test model verbose names."""
+        self.assertEqual(Candidate._meta.verbose_name, "candidate")
+        self.assertEqual(Candidate._meta.verbose_name_plural, "candidates")
+
+    def test_database_table_name(self):
+        """Test database table name."""
+        self.assertEqual(Candidate._meta.db_table, "candidates")
+
 
 class TestStatusHistoryModel(TestCase):
     """Unit tests for StatusHistory model."""
@@ -185,3 +202,62 @@ class TestStatusHistoryModel(TestCase):
         # Compare IDs as strings since UUID comparison can be tricky
         self.assertEqual(str(histories[0].id), str(history2.id))  # Most recent first
         self.assertEqual(str(histories[1].id), str(history1.id))
+
+    def test_verbose_names(self):
+        """Test model verbose names."""
+        self.assertEqual(StatusHistory._meta.verbose_name, "status history")
+        # Django's default pluralization may vary
+        self.assertIn(StatusHistory._meta.verbose_name_plural, ["status historys", "status histories"])
+
+    def test_database_table_name(self):
+        """Test database table name."""
+        self.assertEqual(StatusHistory._meta.db_table, "status_history")
+
+    def test_indexes_exist(self):
+        """Test that required indexes exist."""
+        indexes = [index.name for index in StatusHistory._meta.indexes]
+        expected_indexes = ["status_hist_candida_47fe2d_idx"]
+        for expected in expected_indexes:
+            self.assertIn(expected, indexes)
+
+
+class TestDepartmentChoices(TestCase):
+    """Test Department choices."""
+
+    def test_department_choices_exist(self):
+        """Test that all expected department choices exist."""
+        expected_choices = [
+            ("it", "Information Technology"),
+            ("hr", "Human Resources"),
+            ("finance", "Finance"),
+        ]
+        self.assertEqual(Department.choices, expected_choices)
+
+    def test_department_choices_values(self):
+        """Test department choice values."""
+        self.assertEqual(Department.IT, "it")
+        self.assertEqual(Department.HR, "hr")
+        self.assertEqual(Department.FINANCE, "finance")
+
+
+class TestApplicationStatusChoices(TestCase):
+    """Test ApplicationStatus choices."""
+
+    def test_application_status_choices_exist(self):
+        """Test that all expected application status choices exist."""
+        expected_choices = [
+            ("submitted", "Submitted"),
+            ("under_review", "Under Review"),
+            ("interview_scheduled", "Interview Scheduled"),
+            ("rejected", "Rejected"),
+            ("accepted", "Accepted"),
+        ]
+        self.assertEqual(ApplicationStatus.choices, expected_choices)
+
+    def test_application_status_choices_values(self):
+        """Test application status choice values."""
+        self.assertEqual(ApplicationStatus.SUBMITTED, "submitted")
+        self.assertEqual(ApplicationStatus.UNDER_REVIEW, "under_review")
+        self.assertEqual(ApplicationStatus.INTERVIEW_SCHEDULED, "interview_scheduled")
+        self.assertEqual(ApplicationStatus.REJECTED, "rejected")
+        self.assertEqual(ApplicationStatus.ACCEPTED, "accepted")
