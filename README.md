@@ -29,11 +29,10 @@ A Django REST API backend and Vue.js frontend for managing job candidates. HR te
 
 ### Backend
 - **Django 5.2.4** - Web framework
-- **Django REST Framework 3.14+** - API toolkit
+- **Django REST Framework 3.14+** - API framework
 - **PostgreSQL 15** - Database
 - **Django Filter 23.0+** - Filtering and search
 - **Pillow 10.0+** - File processing
-- **DRF YASG 1.21+** - API documentation
 - **Django CORS Headers 4.0+** - Cross-origin support
 - **Django Storages 1.14+** - Cloud storage
 - **Boto3 1.26+** - AWS SDK
@@ -131,7 +130,6 @@ A Django REST API backend and Vue.js frontend for managing job candidates. HR te
    - Frontend: http://localhost:8080
    - API: http://localhost:8000/api/
    - Admin: http://localhost:8000/admin/
-   - Swagger docs: http://localhost:8000/swagger/
 
 ### First Time Setup Notes
 
@@ -395,7 +393,6 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 ### User Experience
 - **Intuitive API design** with RESTful endpoints
 - **Comprehensive error handling** with meaningful messages
-- **Swagger documentation** for API exploration
 - **Responsive frontend** with modern UI
 - **Real-time status updates** with history tracking
 

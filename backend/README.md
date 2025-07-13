@@ -155,7 +155,6 @@ A Django REST API for managing job candidates. This handles all the data, busine
    - Frontend: http://localhost:8080
    - API: http://localhost:8000/api/
    - Admin: http://localhost:8000/admin/
-   - Swagger docs: http://localhost:8000/swagger/
 
 ### First Time Setup Notes
 
@@ -187,7 +186,6 @@ A Django REST API for managing job candidates. This handles all the data, busine
 3. Access the API
    - API: http://localhost:8000/api/
    - Admin: http://localhost:8000/admin/
-   - Swagger docs: http://localhost:8000/swagger/
 
 ## Commands
 
@@ -537,7 +535,6 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 - **SQLite** - Test database
 
 ### API & Documentation
-- **DRF YASG 1.21+** - Swagger documentation
 - **Django CORS Headers 4.0+** - Cross-origin support
 - **Django Filter 23.0+** - Advanced filtering
 
@@ -677,7 +674,6 @@ backend/
 ### User Experience
 - **Intuitive API design** with RESTful endpoints
 - **Comprehensive error handling** with meaningful messages
-- **Swagger documentation** for API exploration
 - **Responsive frontend** with modern UI
 - **Real-time status updates** with history tracking
 - **Email notifications** for better user engagement

@@ -39,10 +39,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_filters',
-    'drf_yasg',
+
     'storages',
     # Local apps
     'candidate',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -283,15 +284,3 @@ X_FRAME_OPTIONS = 'DENY'
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
-
-# Swagger settings
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'X-ADMIN': {
-            'type': 'apiKey',
-            'name': 'X-ADMIN',
-            'in': 'header'
-        }
-    },
-    'USE_SESSION_AUTH': False,
-}
