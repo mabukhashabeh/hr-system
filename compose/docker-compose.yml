@@ -58,10 +58,14 @@ services:
       - ../backend:/app
     env_file:
       - .env
+    environment:
+      - CELERY_WORKER=1
     depends_on:
       - db
       - rabbitmq
+      - api
     command: celery -A config worker --loglevel=info
+    entrypoint: []
 
 volumes:
   postgres_data:
