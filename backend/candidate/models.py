@@ -1,17 +1,16 @@
+import uuid
 from datetime import datetime
+from pathlib import Path
 
 from django.db import models
 from django.utils import timezone
-from pathlib import Path
-import uuid
-from django.conf import settings
 
 from core.validators import (
     age_validator,
     experience_validator,
     file_size_validator,
     file_type_validator,
-    phone_number_validator
+    phone_number_validator,
 )
 
 
@@ -45,27 +44,18 @@ class Candidate(models.Model):
     full_name = models.CharField(max_length=255, db_index=True)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, unique=True, validators=[phone_number_validator])
-    date_of_birth = models.DateField(
-        validators=[age_validator]
-    )
+    date_of_birth = models.DateField(validators=[age_validator])
     years_of_experience = models.PositiveIntegerField(
         validators=[experience_validator],
     )
-    department = models.CharField(
-        max_length=10,
-        choices=Department.choices,
-        db_index=True
-    )
+    department = models.CharField(max_length=10, choices=Department.choices, db_index=True)
     resume = models.FileField(
         upload_to=candidate_resume_path,
         max_length=500,
         validators=[file_size_validator, file_type_validator],
     )
     current_status = models.CharField(
-        max_length=20,
-        choices=ApplicationStatus.choices,
-        default=ApplicationStatus.SUBMITTED,
-        db_index=True
+        max_length=20, choices=ApplicationStatus.choices, default=ApplicationStatus.SUBMITTED, db_index=True
     )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -87,8 +77,10 @@ class Candidate(models.Model):
         if not self.date_of_birth:
             return None
         today = timezone.now().date()
-        return today.year - self.date_of_birth.year - (
-                (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+        return (
+            today.year
+            - self.date_of_birth.year
+            - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
         )
 
 
@@ -96,21 +88,9 @@ class StatusHistory(models.Model):
     """Track all status changes with admin information."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    candidate = models.ForeignKey(
-        Candidate,
-        on_delete=models.CASCADE,
-        related_name="status_history"
-    )
-    previous_status = models.CharField(
-        max_length=20,
-        choices=ApplicationStatus.choices,
-        blank=True,
-        null=True
-    )
-    new_status = models.CharField(
-        max_length=20,
-        choices=ApplicationStatus.choices
-    )
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name="status_history")
+    previous_status = models.CharField(max_length=20, choices=ApplicationStatus.choices, blank=True, null=True)
+    new_status = models.CharField(max_length=20, choices=ApplicationStatus.choices)
     feedback = models.TextField(blank=True)
     admin_name = models.CharField(max_length=255, default="System Admin")
     admin_email = models.EmailField(null=True, blank=True)

@@ -1,193 +1,146 @@
-# Backend API
+# HR System Backend
 
-A Django REST API for managing job candidates. This handles all the data, business logic, and provides endpoints for the frontend.
+A Django REST API backend for HR candidate management with detailed testing, code quality automation, and modern development practices.
 
-## What it does
-
-- Store candidate information (name, email, phone, resume)
-- Track application status (applied, reviewing, interviewed, hired, etc.)
-- Handle file uploads (resumes)
-- Provide search and filtering
-- Manage user permissions
-- Generate status history
-- Send email notifications asynchronously
-- Process background tasks with Celery
-
-## User Roles
-
-### Admin Users
-- **Full system access** with `X-ADMIN: 1` header
-- **Candidate management**: List, view, and update candidates
-- **Status management**: Update candidate application status with feedback
-- **Resume access**: Download and review candidate resumes
-- **System administration**: Access admin interface and system settings
-
-### Candidates
-- **Public registration**: Submit applications with personal information
-- **Status checking**: Check application status via public endpoint
-- **Email notifications**: Receive confirmation and status update emails
-- **No direct system access**: Cannot view other candidates or admin features
-
-## Features
-
-### Candidate Management
-- Add new candidates with all their details
-- Upload and store resume files
-- Update candidate information
-- View candidate details and history
-
-### Status Tracking
-- Track application progress through different stages
-- Automatic status history logging
-- Status validation (can't skip steps)
-- Timestamps for all changes
-
-### Email Notifications
-- **Registration confirmation**: Welcome email when candidate registers
-- **Status updates**: Notify candidates when their status changes
-- **Asynchronous processing**: Emails sent in background using Celery
-- **Template-based**: HTML and plain text email templates
-- **Configurable**: Support for multiple email providers (SMTP, AWS SES, etc.)
-
-### Background Tasks
-- **Celery integration**: Process tasks asynchronously
-- **RabbitMQ message queue**: Reliable task processing
-- **Email queuing**: Non-blocking email sending
-- **Task monitoring**: Track task status and failures
-
-### Search and Filter
-- Search by name or email
-- Filter by application status
-- Filter by department
-- Sort by any field
-- Pagination for large lists
-
-### File Handling
-- Resume upload with validation
-- File type checking (PDF, DOC, DOCX)
-- File size limits (5MB max)
-- Secure file storage
-- Resume download for admins
-
-### Security
-- Admin-only access for most features
-- Public status checking endpoint
-- File upload validation
-- Input sanitization
-- CSRF protection
-
-## Complete Setup Guide
-
-### Prerequisites
-- Docker and Docker Compose installed
-- Git installed
-- At least 2GB free disk space
-
-### Step-by-Step Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd hr-system
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp compose/.env.sample compose/.env
-   ```
-
-3. **Edit the environment file**
-   ```bash
-   # Open compose/.env in your editor
-   nano compose/.env
-   # or
-   code compose/.env
-   ```
-
-4. **Configure your settings** (optional)
-   ```env
-   # Django settings
-   SECRET_KEY=your-secret-key-here
-   DEBUG=True
-   ALLOWED_HOSTS=localhost,127.0.0.1
-
-   # Database settings
-   DB_NAME=hr_system
-   DB_USER=postgres
-   DB_PASSWORD=postgres
-   DB_HOST=localhost
-   DB_PORT=5432
-
-   # Email settings (for notifications)
-   EMAIL_BACKEND=django.core.mail.backends.dummy.EmailBackend
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_USE_TLS=True
-   EMAIL_HOST_USER=your-email@gmail.com
-   EMAIL_HOST_PASSWORD=your-app-password
-
-   # Celery settings
-   CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-
-   # Test settings
-   TEST_DB_HOST=test_db
-   TEST_DB_NAME=hr_system_test
-   TEST_DB_USER=hr_user
-   TEST_DB_PASSWORD=hr_password
-   TEST_DEBUG=True
-   TEST_DJANGO_SETTINGS_MODULE=config.test_settings
-   ```
-
-5. **Start the entire system**
-   ```bash
-   cd backend
-   make up
-   ```
-
-6. **Wait for services to start** (first time takes 2-3 minutes)
-   - API container building
-   - Database initialization
-   - Frontend container building
-   - RabbitMQ message queue starting
-   - Celery worker starting
-
-7. **Access the application**
-   - Frontend: http://localhost:8080
-   - API: http://localhost:8000/api/
-   - Admin: http://localhost:8000/admin/
-
-### First Time Setup Notes
-
-- **First run**: Docker will download images and build containers
-- **Database**: PostgreSQL will initialize automatically
-- **Migrations**: Django migrations run automatically
-- **Media files**: Resume uploads stored in `backend/media/`
-- **Message queue**: RabbitMQ starts automatically
-- **Background workers**: Celery workers start automatically
-
-## How to run
+## Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose
 - Git
 
-### Quick start
-
-1. Go to backend folder
+### Setup
+1. **Navigate to backend directory:**
    ```bash
    cd backend
    ```
 
-2. Start all services
+2. **Start all services:**
    ```bash
    make up
    ```
 
-3. Access the API
+3. **Access the API:**
    - API: http://localhost:8000/api/
    - Admin: http://localhost:8000/admin/
 
-## Commands
+## Code Quality & Pre-commit Automation
+
+This project uses pre-commit hooks to automatically maintain code quality and consistency. The hooks run before each commit and ensure your code meets high standards.
+
+### What Pre-commit Does For You
+
+**Automatic Code Improvement:**
+- Formats your Python code with consistent style (Black)
+- Organizes imports properly (isort)
+- Removes unused imports and variables (autoflake)
+- Ensures proper line endings and file structure
+
+**Quality Checks:**
+- Lints your code for style and potential issues (flake8)
+- Checks for security vulnerabilities (bandit)
+- Validates type hints and catches type errors (mypy)
+- Runs tests to make sure nothing breaks
+- Validates Django configuration and settings
+
+**Testing & Validation:**
+- Executes the full test suite with coverage
+- Performs Django system checks
+- Ensures database migrations are up to date
+- Validates API endpoints and permissions
+
+### Setting Up Pre-commit
+
+**First time setup:**
+```bash
+cd backend
+pre-commit install
+```
+
+This installs the pre-commit hooks that will run automatically on every commit.
+
+**Manual execution:**
+```bash
+# Run all hooks on all files
+pre-commit run --all-files
+
+# Run specific hooks
+pre-commit run black --all-files
+pre-commit run flake8 --all-files
+pre-commit run mypy --all-files
+```
+
+**What happens when you commit:**
+1. Pre-commit automatically formats your Python files
+2. Runs all quality checks and security scans
+3. Executes tests to ensure everything still works
+4. Only allows the commit if all checks pass
+5. If any check fails, it shows you exactly what to fix
+
+### Pre-commit Hooks Included
+
+**Code Formatting:**
+- **Black** - Consistent Python code formatting
+- **isort** - Import statement organization
+- **autoflake** - Removes unused imports and variables
+
+**Quality Assurance:**
+- **flake8** - Style guide enforcement and error detection
+- **mypy** - Static type checking
+- **bandit** - Security vulnerability scanning
+
+**Testing & Validation:**
+- **pytest** - Runs the full test suite with coverage
+- **Django check** - Validates Django configuration
+- **Django migrations** - Ensures migrations are created
+
+### Using Pre-commit Effectively
+
+**Normal workflow:**
+```bash
+# Make your changes
+# Stage your files
+git add .
+
+# Commit (pre-commit runs automatically)
+git commit -m "your message"
+```
+
+**If pre-commit fails:**
+1. Fix the issues it shows you
+2. Stage the fixed files: `git add .`
+3. Try committing again: `git commit -m "your message"`
+
+**Emergency bypass (use sparingly):**
+```bash
+git commit -m "emergency fix" --no-verify
+```
+
+**Update hook versions:**
+```bash
+pre-commit autoupdate
+```
+
+### Pre-commit Benefits
+
+**For Developers:**
+- No more manual code formatting
+- Catches bugs and security issues early
+- Ensures consistent code style across the team
+- Prevents broken code from being committed
+
+**For the Project:**
+- Maintains high code quality standards
+- Reduces technical debt
+- Ensures all code is tested
+- Provides consistent development experience
+
+**For Teams:**
+- Enforces coding standards automatically
+- Reduces code review time
+- Prevents common mistakes
+- Ensures everyone follows the same practices
+
+## Development Commands
 
 ### Start and stop
 ```bash
@@ -382,195 +335,6 @@ make help
 - **Broker**: RabbitMQ (amqp://guest:guest@rabbitmq:5672//)
 - **Result backend**: Disabled (not needed for email tasks)
 - **Concurrency**: 12 workers per container
-- **Task routing**: Automatic routing to appropriate queues
-
-## File Upload
-
-### Supported formats
-- PDF files
-- DOC files
-- DOCX files
-
-### Limits
-- Maximum file size: 5MB
-- One resume per candidate
-
-## Testing
-
-The backend has comprehensive tests:
-
-- **50 tests** covering all features
-- **89% code coverage**
-- **Fast execution** (2.4 seconds for all tests)
-- **Isolated environment** (SQLite in-memory)
-
-### Test categories
-- Model tests (database operations)
-- View tests (API endpoints)
-- Serializer tests (data validation)
-- Permission tests (access control)
-- Validator tests (custom validation)
-- Email notification tests
-- Background task tests
-
-## Database Optimizations
-
-### Indexed Fields
-- **Candidate Model**:
-  - `full_name` (db_index=True) - Fast name searches
-  - `department` (db_index=True) - Efficient department filtering
-  - `current_status` (db_index=True) - Quick status filtering
-  - `created_at` (db_index=True) - Optimized date sorting
-  - Composite indexes: `[department, created_at]`, `[current_status, created_at]`
-
-- **StatusHistory Model**:
-  - `candidate` (ForeignKey with index) - Fast candidate lookups
-  - `created_at` (db_index=True) - Efficient history sorting
-  - Composite index: `[candidate, created_at]`
-
-### Performance Features
-- **UUID primary keys** for security and scalability
-- **Optimized queries** with select_related and prefetch_related
-- **Database constraints** for data integrity
-- **Efficient pagination** with PageNumberPagination
-- **Fast filtering** with Django Filter backend
-
-## Rate Limiting
-
-### Production Throttling
-```python
-'DEFAULT_THROTTLE_RATES': {
-    'anon': '20/minute',
-    'user': '100/minute',
-}
-```
-
-- **Anonymous users**: 20 requests per minute
-- **Authenticated users**: 100 requests per minute
-- **Admin users**: Same as authenticated users (100/minute)
-
-### Test Environment
-- **Throttling disabled** for faster test execution
-- **Unlimited requests** during development and testing
-
-## File Storage Configuration
-
-### Supported Formats
-- **PDF** (.pdf) - Preferred format
-- **DOC** (.doc) - Microsoft Word legacy
-- **DOCX** (.docx) - Microsoft Word modern
-
-### File Limits
-- **Maximum size**: 5MB per file
-- **Security**: File type validation and size checking
-
-### Storage Providers
-
-#### 1. Local Storage (Default)
-```env
-DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage
-```
-- Files stored locally in `backend/media/`
-- No additional configuration needed
-- Good for development and small deployments
-
-#### 2. AWS S3
-```env
-DEFAULT_FILE_STORAGE=storages.backends.s3boto3.S3Boto3Storage
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_STORAGE_BUCKET_NAME=your-bucket-name
-AWS_S3_REGION_NAME=us-east-1
-```
-- Scalable cloud storage
-- CDN support
-- High availability
-
-#### 3. OCI Object Storage
-```env
-DEFAULT_FILE_STORAGE=storages.backends.s3boto3.S3Boto3Storage
-STORAGE_PROVIDER=oci
-AWS_ACCESS_KEY_ID=your-oci-access-key
-AWS_SECRET_ACCESS_KEY=your-oci-secret-key
-AWS_STORAGE_BUCKET_NAME=your-oci-bucket-name
-AWS_S3_REGION_NAME=us-ashburn-1
-AWS_S3_ENDPOINT_URL=https://objectstorage.us-ashburn-1.oraclecloud.com
-```
-- Oracle Cloud Infrastructure
-- Compatible with S3 API
-- Enterprise-grade storage
-
-#### 4. Google Cloud Storage
-```env
-DEFAULT_FILE_STORAGE=storages.backends.s3boto3.GCSStorage
-```
-- Google Cloud Platform
-- Set GCS credentials and bucket as required
-- Global CDN support
-
-#### 5. Azure Blob Storage
-```env
-DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
-```
-- Microsoft Azure
-- Set Azure credentials and container as required
-- Enterprise integration
-
-### Storage Configuration Steps
-
-1. **Choose your storage provider**
-2. **Set environment variables** in `compose/.env`
-3. **Restart the application**
-   ```bash
-   make down
-   make up
-   ```
-
-## Tools & Libraries Used
-
-### Backend Framework
-- **Django 5.2.4** - Web framework
-- **Django REST Framework 3.14+** - API toolkit
-- **PostgreSQL 15** - Database
-- **SQLite** - Test database
-
-### API & Documentation
-- **Django CORS Headers 4.0+** - Cross-origin support
-- **Django Filter 23.0+** - Advanced filtering
-
-### File Handling
-- **Pillow 10.0+** - Image processing
-- **Django Storages 1.14+** - Cloud storage
-- **Boto3 1.26+** - AWS SDK
-
-### Database
-- **Psycopg2 Binary 2.9+** - PostgreSQL adapter
-- **Python Decouple 3.8+** - Environment config
-
-### Background Tasks & Messaging
-- **Celery 5.3+** - Task queue and background processing
-- **Kombu 5.3+** - Message transport
-- **AMQP 5.1+** - Message protocol
-- **RabbitMQ** - Message broker
-
-### Email & Notifications
-- **Django SES 4.4+** - AWS SES integration
-- **Email templates** - HTML and plain text
-- **Async processing** - Non-blocking email sending
-
-### Testing
-- **Pytest 8.4+** - Testing framework
-- **Pytest Django 4.11+** - Django integration
-- **Pytest Coverage 6.2+** - Coverage reporting
-- **Factory Boy 3.2+** - Test data generation
-- **Faker 19.0+** - Fake data
-- **Pytest Xdist 3.8+** - Parallel testing
-- **Pytest Benchmark 4.0+** - Performance testing
-
-### Code Quality
-- **Black 23.0+** - Code formatting
-- **Flake8 6.0+** - Linting
-- **Isort 5.12+** - Import sorting
 
 ## Environment Variables
 
@@ -636,13 +400,14 @@ backend/
 ├── Dockerfile            # Container setup
 ├── entry.sh              # Startup script
 ├── Makefile              # Commands
+├── .pre-commit-config.yaml # Code quality hooks
 └── pyproject.toml        # Dependencies
 ```
 
 ## Technical Assessment Strengths
 
 ### Code Quality
-- **89% test coverage** with detailed test suite
+- **90% test coverage** with detailed test suite
 - **Clean architecture** following Django best practices
 - **Type hints** and comprehensive documentation
 - **Code formatting** with Black and isort
@@ -733,29 +498,17 @@ lsof -i :5672
 # Stop conflicting services or change ports in compose/.env
 ```
 
-### Celery/RabbitMQ issues
+### Pre-commit issues
 ```bash
-# Check Celery worker status
-make celery-status
+# Clean pre-commit cache
+pre-commit clean
 
-# Restart Celery worker
-make celery-restart
+# Reinstall hooks
+pre-commit install
 
-# Check RabbitMQ logs
-docker logs hr_system_rabbitmq
+# Run with verbose output
+pre-commit run --all-files -v
 
-# Restart message queue
-make down
-make up
-```
-
-### Email issues
-```bash
-# Check email configuration
-grep EMAIL compose/.env
-
-# Test email sending
-make shell
-python manage.py shell
-# Test email sending in shell
+# Update hook versions
+pre-commit autoupdate
 ``` 

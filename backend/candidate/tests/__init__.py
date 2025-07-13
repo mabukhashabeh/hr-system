@@ -1,1 +1,1 @@
-# Candidate app tests 
+# Candidate app tests

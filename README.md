@@ -1,6 +1,15 @@
-# HR System
+# HR System - Full Stack Application
 
-A Django REST API backend and Vue.js frontend for managing job candidates. HR teams can track applications, manage status updates, and handle resume uploads.
+**Note:** This repository contains both frontend (Vue.js) and backend (Django) in a single monorepo structure for POC purposes. In production environments, these would typically be separate repositories with proper CI/CD pipelines.
+
+## Overview
+
+A micro HR management system with candidate registration, status tracking, and resume management. Features include:
+
+- **Backend:** Django REST API with PostgreSQL, Celery, RabbitMQ
+- **Frontend:** Vue.js with modern UI components
+- **Testing:** Detailed test suite with over 90% coverage
+- **Code Quality:** Automated pre-commit hooks for consistent code standards
 
 ## What This System Does
 
@@ -126,17 +135,73 @@ A Django REST API backend and Vue.js frontend for managing job candidates. HR te
    - Database initialization
    - Frontend container building
 
-7. **Access the application**
+7. **Run database migrations** (first time only)
+   ```bash
+   cd backend
+   make makemigrations
+   make migrate
+   ```
+
+8. **Access the application**
    - Frontend: http://localhost:8080
    - API: http://localhost:8000/api/
-   - Admin: http://localhost:8000/admin/
 
 ### First Time Setup Notes
 
 - **First run**: Docker will download images and build containers
 - **Database**: PostgreSQL will initialize automatically
-- **Migrations**: Django migrations run automatically
+- **Migrations**: Run `make makemigrations` and `make migrate` manually
 - **Media files**: Resume uploads stored in `backend/media/`
+
+## Code Quality & Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality and consistency. The hooks run automatically before each commit and include:
+
+### What Pre-commit Does
+- **Formats your code** with Black and isort
+- **Removes unused imports** with autoflake
+- **Checks code quality** with flake8 and mypy
+- **Scans for security issues** with bandit
+- **Runs tests** to ensure nothing breaks
+- **Validates Django configuration**
+
+### Using Pre-commit
+
+**First time setup:**
+```bash
+cd backend
+pre-commit install
+```
+
+**Run manually:**
+```bash
+cd backend
+pre-commit run --all-files
+```
+
+**Run specific hooks:**
+```bash
+pre-commit run black --all-files
+pre-commit run flake8 --all-files
+```
+
+**Skip hooks (emergency only):**
+```bash
+git commit -m "your message" --no-verify
+```
+
+### What Happens When You Commit
+1. Pre-commit automatically formats your Python files
+2. Runs linting and security checks
+3. Executes tests to ensure everything works
+4. Only allows commit if all checks pass
+
+### Pre-commit Hooks Included
+- **Formatting:** Black, isort, autoflake
+- **Linting:** flake8, mypy
+- **Security:** bandit
+- **Testing:** pytest with coverage
+- **Django:** system checks and validation
 
 ## Development Commands
 
@@ -170,6 +235,16 @@ make test-build
 
 # Clean up test containers and volumes
 make test-clean
+```
+
+### Database
+
+```bash
+# Create database migrations
+make makemigrations
+
+# Apply database migrations
+make migrate
 ```
 
 ### Development Tools
@@ -208,7 +283,7 @@ make help
 ## Testing Infrastructure
 
 - **Fast Execution**: SQLite in-memory database for instant test execution
-- **High Coverage**: **99.7% code coverage** with 63 comprehensive tests
+- **High Coverage**: **90% code coverage** with 50 comprehensive tests
 - **Isolated Environment**: Containerized testing with automatic cleanup
 - **Comprehensive Reports**: HTML and terminal coverage reports
 
@@ -222,8 +297,8 @@ make help
 
 ### Test Performance
 
-- **Execution time**: ~1.15 seconds for all 63 tests
-- **Coverage**: 99.7% (333 statements, 1 missing)
+- **Execution time**: ~2.4 seconds for all 50 tests
+- **Coverage**: 90% with comprehensive test suite
 - **Test isolation**: Each test runs in clean environment
 - **Parallel execution**: Support for parallel test running
 
@@ -363,7 +438,7 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 ## Technical Assessment Strengths
 
 ### Code Quality
-- **99.7% test coverage** with comprehensive test suite
+- **90% test coverage** with comprehensive test suite
 - **Clean architecture** following Django best practices
 - **Type hints** and comprehensive documentation
 - **Code formatting** with Black and isort
@@ -372,7 +447,7 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 ### Performance
 - **Database optimization** with strategic indexing
 - **Efficient queries** with proper ORM usage
-- **Fast test execution** (1.15 seconds for 63 tests)
+- **Fast test execution** (2.4 seconds for 50 tests)
 - **Containerized deployment** for consistency
 - **Rate limiting** to prevent abuse
 
@@ -385,7 +460,7 @@ DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 
 ### Maintainability
 - **Comprehensive documentation** with clear examples
-- **Automated testing** with 63 test cases
+- **Automated testing** with 50 test cases
 - **Development tools** for code quality
 - **Clear project structure** following conventions
 - **Environment configuration** management
@@ -466,6 +541,7 @@ hr-system/
 │   ├── Dockerfile         # Container setup
 │   ├── entry.sh           # Startup script
 │   ├── Makefile           # Commands
+│   ├── .pre-commit-config.yaml # Code quality hooks
 │   └── pyproject.toml     # Dependencies
 ├── frontend/              # Vue.js frontend
 │   ├── src/               # Source code
@@ -530,4 +606,19 @@ lsof -i :8080
 lsof -i :5432
 
 # Stop conflicting services or change ports in compose/.env
+```
+
+### Pre-commit issues
+```bash
+# Clean pre-commit cache
+pre-commit clean
+
+# Reinstall hooks
+pre-commit install
+
+# Run with verbose output
+pre-commit run --all-files -v
+
+# Update hook versions
+pre-commit autoupdate
 ``` 

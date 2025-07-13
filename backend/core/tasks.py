@@ -1,5 +1,7 @@
 import logging
+
 from celery import shared_task
+
 from .notification_service import NotificationService
 
 logger = logging.getLogger(__name__)
@@ -7,19 +9,18 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_email_task(
-        self, template_name: str, context: dict, subject: str,
-        recipient_email: str, recipient_name: str = None
+    self, template_name: str, context: dict, subject: str, recipient_email: str, recipient_name: str = None
 ) -> bool:
     """
     Celery task to send email asynchronously.
-    
+
     Args:
         template_name: Email template name
         context: Template context data
         subject: Email subject
         recipient_email: Recipient email
         recipient_name: Recipient name (optional)
-    
+
     Returns:
         bool: True if email sent successfully
     """
@@ -29,7 +30,7 @@ def send_email_task(
             context=context,
             subject=subject,
             recipient_email=recipient_email,
-            recipient_name=recipient_name
+            recipient_name=recipient_name,
         )
 
         if success:

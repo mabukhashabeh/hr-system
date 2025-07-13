@@ -1,4 +1,4 @@
-.PHONY: help test coverage clean install dev server build stop up down logs shell test-build test-clean
+.PHONY: help test coverage clean install dev server build stop up down logs shell test-build test-clean check makemigrations migrate
 
 # Default target
 help:
@@ -11,9 +11,14 @@ help:
 	@echo "  logs        - Show logs for all services"
 	@echo "  shell       - Open shell in API container"
 	@echo ""
+	@echo "Database:"
+	@echo "  makemigrations - Create database migrations"
+	@echo "  migrate       - Apply database migrations"
+	@echo ""
 	@echo "Testing:"
 	@echo "  test        - Run all tests with coverage"
 	@echo "  coverage    - Run tests with coverage report"
+	@echo "  check       - Run Django system check"
 	@echo "  test-build  - Build test environment"
 	@echo "  test-clean  - Clean up test containers and volumes"
 	@echo ""
@@ -37,10 +42,15 @@ test-build:
 	@echo "Building test environment..."
 	docker-compose  -f ../compose/docker-compose.test.yml build
 
+# Run Django check
+check:
+	@echo "Running Django check..."
+	docker-compose -f ../compose/docker-compose.yml run --rm api python manage.py check
+
 # Run all tests with coverage
 test:
 	@echo "Running all tests with coverage..."
-	docker-compose  -f ../compose/docker-compose.test.yml run --rm test
+	docker-compose -f ../compose/docker-compose.test.yml run --rm test
 
 coverage:
 	@echo "Running tests with coverage report..."
@@ -116,4 +126,14 @@ build:
 # Stop all services
 stop:
 	@echo "Stopping all services..."
-	docker-compose -f ../compose/docker-compose.yml down 
+	docker-compose -f ../compose/docker-compose.yml down
+
+# Create database migrations
+makemigrations:
+	@echo "Creating database migrations..."
+	docker-compose -f ../compose/docker-compose.yml run --rm api python manage.py makemigrations
+
+# Apply database migrations
+migrate:
+	@echo "Applying database migrations..."
+	docker-compose -f ../compose/docker-compose.yml run --rm api python manage.py migrate

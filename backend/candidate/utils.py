@@ -1,8 +1,11 @@
 import logging
+
 from django.utils import timezone
+
 from core.tasks import send_email_task
 
 logger = logging.getLogger(__name__)
+
 
 def send_registration_email(candidate):
     """Send registration confirmation email asynchronously."""
@@ -21,12 +24,13 @@ def send_registration_email(candidate):
             context=context,
             subject=subject,
             recipient_email=candidate.email,
-            recipient_name=candidate.full_name
+            recipient_name=candidate.full_name,
         )
         logger.info(f"Registration email queued for {candidate.email}")
 
     except Exception as e:
         logger.error(f"Error queuing registration email for {candidate.email}: {str(e)}")
+
 
 def send_status_update_email(candidate, new_status, previous_status, update_data):
     """Send status update email asynchronously."""
@@ -48,7 +52,7 @@ def send_status_update_email(candidate, new_status, previous_status, update_data
             context=context,
             subject=subject,
             recipient_email=candidate.email,
-            recipient_name=candidate.full_name
+            recipient_name=candidate.full_name,
         )
 
         logger.info(f"Status update email queued for {candidate.email}: {previous_status} -> {new_status}")
