@@ -209,23 +209,23 @@ CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", default=False, cas
 #    DEFAULT_FILE_STORAGE=storages.backends.s3boto3.AzureStorage
 #    (Set Azure credentials and container as required)
 #
-DEFAULT_FILE_STORAGE = config(
-    "DEFAULT_FILE_STORAGE", default="django.core.files.storage.FileSystemStorage"
-)  # Local storage by default
-
+STORAGES = {
+    "default": {
+        "BACKEND": config(
+            "DEFAULT_FILE_STORAGE", default="django.core.files.storage.FileSystemStorage"
+        )
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", default="us-east-1")
-AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL", default="")
-AWS_S3_CUSTOM_DOMAIN = config("AWS_S3_CUSTOM_DOMAIN", default="")
-AWS_S3_OBJECT_PARAMETERS = {
-    "CacheControl": "max-age=86400",
-}
 AWS_DEFAULT_ACL = "private"
 AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 3600  # 1 hour
-AWS_S3_FILE_OVERWRITE = False
 
 
 # Logging configuration
